@@ -6,6 +6,6 @@ import com.example.rent_apartment.model.dto.ApartmentDto;
 import java.util.List;
 
 public interface RentApartmentService {
-    List<AddressDto> getAddressByCities(String cityName);
+    List<AddressDto> getAddressByCity(String cityName);
     List<ApartmentDto> getApartmentByPrice(Long price);
 }

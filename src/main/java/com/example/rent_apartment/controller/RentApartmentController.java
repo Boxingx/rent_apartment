@@ -21,7 +21,7 @@ public class RentApartmentController {
 
     @GetMapping(GET_APARTMENT_INFO)
     public List<AddressDto> getAddressInfo(@RequestParam String cityName) {
-        return rentApartmentService.getAddressByCities(cityName);
+        return rentApartmentService.getAddressByCity(cityName);
     }
 
     @GetMapping(GET_APARTMENT_BY_PRICE)

@@ -29,7 +29,7 @@ public class RentApartmentServiceImpl implements RentApartmentService {
     private EntityManager entityManager;
 
     @Override
-    public List<AddressDto> getAddressByCities(String cityName) {
+    public List<AddressDto> getAddressByCity(String cityName) {
 //        List<AddressEntity> addressEntityList = addressRepository.getAddressInformationByCity(cityName);
         //List<AddressEntity> addressEntityList = addressRepository.getAddressInformationByCityByJpql(cityName);
         //return prepareRequestByAddressInfo(addressEntityList);
