@@ -1,0 +1,17 @@
+version: "3.9"
+
+services:
+  pg_db:
+    image: postgres
+    restart: always
+    environment:
+      - POSTGRES_DB=rent_apartment
+      - POSTGRES_USER=pg
+      - POSTGRES_PASSWORD=pg
+    volumes:
+      - db:/var/lib/postgresql/data postgres
+    ports:
+      - "5436:5432"
+
+volumes:
+  db:
