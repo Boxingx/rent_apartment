@@ -31,7 +31,7 @@ public class RentApartmentServiceImpl implements RentApartmentService {
     @Override
     public List<AddressDto> getAddressByCity(String cityName) {
 //        List<AddressEntity> addressEntityList = addressRepository.getAddressInformationByCity(cityName);
-        //List<AddressEntity> addressEntityList = addressRepository.getAddressInformationByCityByJpql(cityName);
+        //List<AddressEntity> addressEntityList = addressRepository.getAddressInformationByCityByJpql(cityName); //jpql
         //return prepareRequestByAddressInfo(addressEntityList);
         List<AddressEntity> resultList = getAddressInformationByCriteria(cityName);
         return prepareRequestByAddressInfo(resultList);
