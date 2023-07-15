@@ -25,4 +25,6 @@ public interface AddressRepository extends JpaRepository<AddressEntity,Long> {
     String gitTest = "Создал переменную в мастере";
     String gitTest2 = "Создал переменную в фб 001";
     String gitTest3 = "Создал переменную в фб 002";
+
+    String gitTest4 = "Создал переменную в фб 004";
 }
