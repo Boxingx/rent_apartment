@@ -21,4 +21,6 @@ public interface AddressRepository extends JpaRepository<AddressEntity,Long> {
 
     String s = "SELECT * FROM user_info WHERE password = 123 or 1=1";
     String password = "123 or 1=1";
+
+    String gitTesting = "FB_003";
 }
