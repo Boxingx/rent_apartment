@@ -12,4 +12,5 @@ public interface ApartmentRepository extends JpaRepository<ApartmentEntity,Long>
     @Query(nativeQuery = true, value = "SELECT * FROM apartment_info WHERE CAST(price AS bigint) <= :price")
     List<ApartmentEntity> getApartmentInfo(Long price);
 
+
 }

@@ -29,7 +29,6 @@ public class ApartmentEntity {
     @Column(name = "registration_date")
     private String registrationDate;
 
-
     @OneToOne(mappedBy = "apartmentEntity")
     private AddressEntity addressEntity;
 

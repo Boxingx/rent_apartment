@@ -19,10 +19,10 @@ public class RentApartmentController {
     @Autowired
     private RentApartmentService rentApartmentService;
 
-    @GetMapping(GET_APARTMENT_INFO)
-    public List<AddressDto> getAddressInfo(@RequestParam String cityName) {
-        return rentApartmentService.getAddressByCity(cityName);
-    }
+//    @GetMapping(GET_APARTMENT_INFO)
+//    public List<AddressDto> getAddressInfo(@RequestParam String cityName) {
+//        return rentApartmentService.getAddressByCity(cityName);
+//    }
 
     @GetMapping(GET_APARTMENT_BY_PRICE)
     public List<ApartmentDto> getApartmentInfo(@RequestParam String price) {
@@ -30,4 +30,26 @@ public class RentApartmentController {
         return rentApartmentService.getApartmentByPrice(longPrice);
     }
 
+
+    /**
+     * Данный метод выгружает пользователю квартиры по определенным параметрам,
+     * */
+    @GetMapping(GET_APARTMENT_INFO)
+    public List<AddressDto> getAddressInfo(@RequestParam String cityName,
+                                           @RequestParam(required = false) String price,
+                                           @RequestParam(required = false) String roomsCount) {
+        if (price == null && roomsCount == null) {
+            return rentApartmentService.getAddressByCity(cityName);
+        }
+        if (price == null && roomsCount != null) {
+            //TODO   Реализовать метод по городу и кол-ву комнат
+        }
+        if (price != null && roomsCount == null) {
+            //TODO по городу и цене
+        }
+        if (price != null && roomsCount != null) {
+            //TODO по всем трем параметрам
+        }
+        return null;
+    }
 }

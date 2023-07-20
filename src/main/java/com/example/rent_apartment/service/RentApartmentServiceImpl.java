@@ -1,5 +1,6 @@
 package com.example.rent_apartment.service;
 
+import com.example.rent_apartment.mapper.ApplicationMapper;
 import com.example.rent_apartment.model.dto.AddressDto;
 import com.example.rent_apartment.model.dto.ApartmentDto;
 import com.example.rent_apartment.model.entity.AddressEntity;
@@ -10,23 +11,23 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class RentApartmentServiceImpl implements RentApartmentService {
 
-    @Autowired
-    private AddressRepository addressRepository;
+    private final AddressRepository addressRepository;
 
-    @Autowired
-    private ApartmentRepository apartmentRepository;
+    private final ApartmentRepository apartmentRepository;
 
-    @Autowired
-    private EntityManager entityManager;
+    private final EntityManager entityManager;
+
+    private final ApplicationMapper applicationMapper;
 
     @Override
     public List<AddressDto> getAddressByCity(String cityName) {
@@ -60,17 +61,20 @@ public class RentApartmentServiceImpl implements RentApartmentService {
 
         for (ApartmentEntity e : apartmentEntityList) {
 
-            AddressDto addressDto = new AddressDto();
-            addressDto.setCity(e.getAddressEntity().getCity());
-            addressDto.setStreet(e.getAddressEntity().getStreet());
-            addressDto.setBuildingNumber(e.getAddressEntity().getBuildingNumber());
-            addressDto.setApartmentsNumber(e.getAddressEntity().getApartmentsNumber());
+            AddressDto addressDto = applicationMapper.addressEntityToAddressDto(e.getAddressEntity());
+//            AddressDto addressDto = new AddressDto();
+//            addressDto.setCity(e.getAddressEntity().getCity());
+//            addressDto.setStreet(e.getAddressEntity().getStreet());
+//            addressDto.setBuildingNumber(e.getAddressEntity().getBuildingNumber());
+//            addressDto.setApartmentsNumber(e.getAddressEntity().getApartmentsNumber());
 
-            ApartmentDto apartmentDto = new ApartmentDto();
-            apartmentDto.setRoomsCount(e.getRoomsCount());
-            apartmentDto.setPrice(e.getPrice());
-            apartmentDto.setStatus(e.getStatus());
-            apartmentDto.setAverageRating(e.getAverageRating());
+            ApartmentDto apartmentDto = applicationMapper.apartmentEntityToApartmentDto(e);
+
+//            ApartmentDto apartmentDto = new ApartmentDto();
+//            apartmentDto.setRoomsCount(e.getRoomsCount());
+//            apartmentDto.setPrice(e.getPrice());
+//            apartmentDto.setStatus(e.getStatus());
+//            apartmentDto.setAverageRating(e.getAverageRating());
             apartmentDto.setAddressDto(addressDto);
 
             resultList.add(apartmentDto);
