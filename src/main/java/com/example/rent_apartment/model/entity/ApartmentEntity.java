@@ -3,6 +3,8 @@ package com.example.rent_apartment.model.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.List;
+
 @Entity
 @Table(name = "apartment_info")
 @Data
@@ -31,5 +33,8 @@ public class ApartmentEntity {
 
     @OneToOne(mappedBy = "apartmentEntity")
     private AddressEntity addressEntity;
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "apartmentEntity")
+    private List<RatingEntity> ratings;
 
 }

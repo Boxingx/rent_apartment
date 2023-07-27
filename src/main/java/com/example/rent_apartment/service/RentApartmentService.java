@@ -1,11 +1,16 @@
 package com.example.rent_apartment.service;
 
-import com.example.rent_apartment.model.dto.AddressDto;
-import com.example.rent_apartment.model.dto.ApartmentDto;
-
-import java.util.List;
+import com.example.rent_apartment.model.dto.GetAddressInfoResponseDto;
 
 public interface RentApartmentService {
-    List<AddressDto> getAddressByCity(String cityName);
-    List<ApartmentDto> getApartmentByPrice(Long price);
+    GetAddressInfoResponseDto getAddressByCity(String cityName);
+    GetAddressInfoResponseDto getApartmentByPrice(Long price);
+
+    GetAddressInfoResponseDto getApartmentByCityAndRoomsCount(String city, String roomsCount);
+
+    GetAddressInfoResponseDto getApartmentByCityAndPrice(String city, String price);
+
+    GetAddressInfoResponseDto getApartmentByCityAndPriceAndRoomsCount(String city, String price, String roomsCount);
+
+    GetAddressInfoResponseDto findApartmentEntitiesByAverageRatingAndAddressEntity_City(String cityName, String averageRating);
 }
