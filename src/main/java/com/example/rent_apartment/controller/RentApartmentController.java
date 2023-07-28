@@ -1,13 +1,12 @@
 package com.example.rent_apartment.controller;
 
 import com.example.rent_apartment.model.dto.GetAddressInfoResponseDto;
-import com.example.rent_apartment.model.dto.Location;
+import com.example.rent_apartment.model.dto.PersonsLocation;
 import com.example.rent_apartment.service.RentApartmentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import static com.example.rent_apartment.constant_project.ConstantProject.GET_APARTMENT_BY_PRICE;
-import static com.example.rent_apartment.constant_project.ConstantProject.GET_APARTMENT_INFO;
+import static com.example.rent_apartment.constant_project.ConstantProject.*;
 
 @RestController
 public class RentApartmentController {
@@ -59,11 +58,12 @@ public class RentApartmentController {
     /**
      * Описывающий коммент
      * */
-    @PostMapping
-    public GetAddressInfoResponseDto getApartmentsByLocation(@RequestBody Location location) {
-        return null;
+    @PostMapping(GET_APARTMENT_BY_LOCATION)
+    public GetAddressInfoResponseDto getApartmentsByLocation(@RequestBody PersonsLocation location) {
+        return rentApartmentService.getApartmentsByLocation(location);
     }
 
+    //31.783272, 34.662766
     //обычный коммент
     //TODO todo коммент
     /**

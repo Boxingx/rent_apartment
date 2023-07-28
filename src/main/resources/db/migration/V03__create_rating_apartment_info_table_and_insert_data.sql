@@ -10,4 +10,3 @@ CREATE SEQUENCE rating_info_sequence start 3 increment 1;
 INSERT INTO rating_apartment_info
 values (1, 7, 'Квартира супер!',10),
        (2, 3, 'Не было убрано', 10);
-

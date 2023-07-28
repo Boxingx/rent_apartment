@@ -7,4 +7,5 @@ public class ConstantProject {
     public final static String GET_APARTMENT_INFO = BASE_PATH + "/apartment_info";
     public final static String GET_APARTMENT_BY_PRICE = BASE_PATH + "/apartment_price";
 
+    public final static String GET_APARTMENT_BY_LOCATION = BASE_PATH + "/apartment_location";
 }

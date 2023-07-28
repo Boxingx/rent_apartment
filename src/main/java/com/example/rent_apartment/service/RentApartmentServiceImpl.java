@@ -1,13 +1,19 @@
 package com.example.rent_apartment.service;
 
+import com.example.rent_apartment.integration.RestTemplateManager;
 import com.example.rent_apartment.mapper.ApplicationMapper;
 import com.example.rent_apartment.model.dto.AddressDto;
 import com.example.rent_apartment.model.dto.ApartmentDto;
 import com.example.rent_apartment.model.dto.GetAddressInfoResponseDto;
+import com.example.rent_apartment.model.dto.PersonsLocation;
 import com.example.rent_apartment.model.entity.AddressEntity;
 import com.example.rent_apartment.model.entity.ApartmentEntity;
 import com.example.rent_apartment.repository.AddressRepository;
 import com.example.rent_apartment.repository.ApartmentRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -33,12 +39,14 @@ public class RentApartmentServiceImpl implements RentApartmentService {
 
     private final ApplicationMapper applicationMapper;
 
+    private final RestTemplateManager restTemplateManager;
+
     @Override
     public GetAddressInfoResponseDto getAddressByCity(String cityName) {
         List<ApartmentEntity> addressInformation = apartmentRepository.findApartmentEntitiesByAddressEntity_City(cityName);
 //        List<AddressEntity> addressEntityList = addressRepository.getAddressInformationByCityByJpql(cityName); //jpql
         if (addressInformation.isEmpty()) {
-            //TODO правильно ли написал обработку ошибки
+
             GetAddressInfoResponseDto getAddressInfoResponseDto = null;
             getAddressInfoResponseDto.setExceptionCode("getAddressByCity");
             getAddressInfoResponseDto.setExceptionMessage("Нет квартир в этом городе");
@@ -165,6 +173,32 @@ public class RentApartmentServiceImpl implements RentApartmentService {
         return getAddressInfoResponseDto;
     }
 
+    @Override
+    public GetAddressInfoResponseDto getApartmentsByLocation(PersonsLocation location) {
+        GetAddressInfoResponseDto getAddressInfoResponseDto = new GetAddressInfoResponseDto(null);
+        if (location == null) {
+            getAddressInfoResponseDto.setExceptionCode("404");
+            getAddressInfoResponseDto.setExceptionMessage("Неизвестная локация");
+            return getAddressInfoResponseDto;
+        }
+        String infoByLocation = restTemplateManager.getInfoByLocation(location);
+
+        return getAddressByCity(parseLocationInfo(infoByLocation));
+    }
+
+
+    private String parseLocationInfo(String locationInfo) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            JsonNode jsonNode = objectMapper.readTree(locationInfo);
+            return jsonNode.get("results").get(0).get("components").get("city").asText();
+        } catch(JsonMappingException e) {
+
+        } catch (JsonProcessingException e) {
+
+        }
+        return null;
+    }
 
     private List<ApartmentDto> apartmentEntityToDto(List<ApartmentEntity> apartmentEntityList) {
 
