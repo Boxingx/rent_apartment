@@ -6,9 +6,13 @@ import lombok.Data;
 public class AddressDto {
 
     private String city;
+
     private String street;
+
     private String buildingNumber;
+
     private String apartmentsNumber;
+
     private ApartmentDto apartmentDto;
 
 }

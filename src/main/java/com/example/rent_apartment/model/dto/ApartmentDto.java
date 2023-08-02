@@ -6,9 +6,14 @@ import lombok.Data;
 public class ApartmentDto {
 
     private String roomsCount;
+
     private String averageRating;
+
     private String price;
+
     private String status;
+
     private String registrationDate;
+
     private AddressDto addressDto;
 }

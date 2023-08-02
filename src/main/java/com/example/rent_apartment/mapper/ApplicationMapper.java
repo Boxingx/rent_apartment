@@ -9,12 +9,12 @@ import org.mapstruct.Mapper;
 @Mapper(componentModel = "spring")
 public interface ApplicationMapper {
 
-    //    @Mapping(target = "cityInfo", source = "city")
+//    @Mapping(target = "cityInfo", source = "city")
 //    @Mapping(target = "cityInfo", ignore = true)
 //    @Mapping(target = "city", ignore = true)
     AddressDto addressEntityToAddressDto(AddressEntity addressEntity);
 
-    //    @AfterMapping
+//    @AfterMapping
 //    default void prepareCityField(AddressEntity addressEntity, @MappingTarget AddressDto addressDto) {
 //        addressDto.setCity("Значение города изменено после обработки");
 //    }

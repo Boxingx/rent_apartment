@@ -27,6 +27,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.example.rent_apartment.config.CityTranslationStatic.getCityInRussianLanguage;
+
 @Service
 @RequiredArgsConstructor
 public class RentApartmentServiceImpl implements RentApartmentService {
@@ -44,17 +46,14 @@ public class RentApartmentServiceImpl implements RentApartmentService {
     @Override
     public GetAddressInfoResponseDto getAddressByCity(String cityName) {
         List<ApartmentEntity> addressInformation = apartmentRepository.findApartmentEntitiesByAddressEntity_City(cityName);
-//        List<AddressEntity> addressEntityList = addressRepository.getAddressInformationByCityByJpql(cityName); //jpql
-        if (addressInformation.isEmpty()) {
 
-            GetAddressInfoResponseDto getAddressInfoResponseDto = null;
+        if (addressInformation.isEmpty()) {
+            GetAddressInfoResponseDto getAddressInfoResponseDto = new GetAddressInfoResponseDto(null);
             getAddressInfoResponseDto.setExceptionCode("getAddressByCity");
             getAddressInfoResponseDto.setExceptionMessage("Нет квартир в этом городе");
             return getAddressInfoResponseDto;
         }
         return new GetAddressInfoResponseDto(apartmentEntityToDto(addressInformation));
-//        List<AddressEntity> resultList = getAddressInformationByCriteria(cityName);
-//        return prepareRequestByAddressInfo(resultList);
     }
 
     //QUERY WITH CRITERIA API
@@ -142,8 +141,6 @@ public class RentApartmentServiceImpl implements RentApartmentService {
             }
         }
 
-//        List<ApartmentEntity> result = apartmentRepository.findApartmentEntitiesByAverageRatingAndAddressEntity_City(averageRating, cityName);
-
         List<ApartmentEntity> result = apartmentListAfterChange.stream().filter(o -> Integer.parseInt(o.getAverageRating()) <= Integer.parseInt(averageRating)).collect(Collectors.toList());
 
         if (result.isEmpty()) {
@@ -151,28 +148,13 @@ public class RentApartmentServiceImpl implements RentApartmentService {
             getAddressInfoResponseDto.setExceptionMessage("Апартаментов по условиям фильтра \"рейтинга\" не найдено");
             return getAddressInfoResponseDto;
         }
-
-
-//        List<ApartmentEntity> apartmentEntityList = null;
-//        Long[] apartmentsId = apartmentRepository.getApartmentsIdByCity(cityName);
-//        for (int i = 0; i < apartmentsId.length; i++) {
-//            Long averageRatingById = apartmentRepository.getAvgRatingByCityId(apartmentsId[i]);
-//            String averageRatingString = averageRatingById.toString();
-//            try {
-//                String s = "UPDATE apartment_info SET average_rating = %s where id = %s";
-//                String format = String.format(s, averageRatingString, apartmentsId[i]);
-//                jdbcTemplate.execute(format);
-////                apartmentRepository.setNewAvgRatingForApartmentById(averageRatingString, apartmentsId[i]);
-//            } catch (NullPointerException e) {
-//
-//            } finally {
-//                apartmentEntityList.add(apartmentRepository.getApartmentEntitiesByIdAndAverageRating(apartmentsId[i], averageRating));
-//            }
-//        }
         getAddressInfoResponseDto.setApartmentDtoList(apartmentEntityToDto(result));
         return getAddressInfoResponseDto;
     }
 
+    /**Метод принимает объект с координатами, в случае если объект пустой устанавливается код ошибки и сообщение об ошибке, а если
+     * не пустой то получаем JSON из которого вытаскивается нужное поле city(на англ языке) парсится на русский язык с помощью метода getCityInRussianLanguage
+     * класса CityTranslationStatic и происходит поиск апартаметов по городу который мы в итоге получили.*/
     @Override
     public GetAddressInfoResponseDto getApartmentsByLocation(PersonsLocation location) {
         GetAddressInfoResponseDto getAddressInfoResponseDto = new GetAddressInfoResponseDto(null);
@@ -181,24 +163,26 @@ public class RentApartmentServiceImpl implements RentApartmentService {
             getAddressInfoResponseDto.setExceptionMessage("Неизвестная локация");
             return getAddressInfoResponseDto;
         }
-        String infoByLocation = restTemplateManager.getInfoByLocation(location);
+        String infoByLocation = restTemplateManager.getInfoByLocation(location); //ТУТ СОДЕРЖИТСЯ БОЛЬШОЙ JSON, КОТОРЫЙ ПРИШЕЛ НАМ ОТВЕТОМ ОТ ИНТЕГРАЦИОННОГО СЕРВИСА.
 
-        return getAddressByCity(parseLocationInfo(infoByLocation));
+//        String englishCity = parseLocationInfo(infoByLocation);
+
+        return getAddressByCity(getCityInRussianLanguage(englishCity));
     }
 
-
-    private String parseLocationInfo(String locationInfo) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            JsonNode jsonNode = objectMapper.readTree(locationInfo);
-            return jsonNode.get("results").get(0).get("components").get("city").asText();
-        } catch(JsonMappingException e) {
-
-        } catch (JsonProcessingException e) {
-
-        }
-        return null;
-    }
+    /**Метод принимает больщой JSON и вытаскивает из него нужное нам поле city(на английском языке)*/
+//    private String parseLocationInfo(String locationInfo) {
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        try {
+//            JsonNode jsonNode = objectMapper.readTree(locationInfo);
+//            return jsonNode.get("results").get(0).get("components").get("city").asText();
+//        } catch (JsonMappingException e) {
+//
+//        } catch (JsonProcessingException e) {
+//
+//        }
+//        return "Город не найден";
+//    }
 
     private List<ApartmentDto> apartmentEntityToDto(List<ApartmentEntity> apartmentEntityList) {
 
@@ -207,19 +191,7 @@ public class RentApartmentServiceImpl implements RentApartmentService {
         for (ApartmentEntity e : apartmentEntityList) {
 
             AddressDto addressDto = applicationMapper.addressEntityToAddressDto(e.getAddressEntity());
-//            AddressDto addressDto = new AddressDto();
-//            addressDto.setCity(e.getAddressEntity().getCity());
-//            addressDto.setStreet(e.getAddressEntity().getStreet());
-//            addressDto.setBuildingNumber(e.getAddressEntity().getBuildingNumber());
-//            addressDto.setApartmentsNumber(e.getAddressEntity().getApartmentsNumber());
-
             ApartmentDto apartmentDto = applicationMapper.apartmentEntityToApartmentDto(e);
-
-//            ApartmentDto apartmentDto = new ApartmentDto();
-//            apartmentDto.setRoomsCount(e.getRoomsCount());
-//            apartmentDto.setPrice(e.getPrice());
-//            apartmentDto.setStatus(e.getStatus());
-//            apartmentDto.setAverageRating(e.getAverageRating());
             apartmentDto.setAddressDto(addressDto);
 
             resultList.add(apartmentDto);

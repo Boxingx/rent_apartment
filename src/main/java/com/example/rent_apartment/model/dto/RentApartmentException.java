@@ -6,6 +6,9 @@ import lombok.Setter;
 @Getter
 @Setter
 public class RentApartmentException {
+
     private String exceptionCode;
+
     private String exceptionMessage;
+
 }

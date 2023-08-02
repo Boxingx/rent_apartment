@@ -10,5 +10,7 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 public class GetAddressInfoResponseDto extends RentApartmentException {
+
     private List<ApartmentDto> apartmentDtoList;
+
 }

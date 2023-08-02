@@ -5,6 +5,7 @@ import com.example.rent_apartment.model.dto.PersonsLocation;
 
 public interface RentApartmentService {
     GetAddressInfoResponseDto getAddressByCity(String cityName);
+
     GetAddressInfoResponseDto getApartmentByPrice(Long price);
 
     GetAddressInfoResponseDto getApartmentByCityAndRoomsCount(String city, String roomsCount);
