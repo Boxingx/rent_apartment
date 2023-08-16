@@ -1,12 +1,13 @@
 package com.example.rent_apartment.controller;
 
-import com.example.rent_apartment.model.dto.GetAddressInfoResponseDto;
-import com.example.rent_apartment.model.dto.PersonsLocation;
+import com.example.rent_apartment.model.dto.*;
 import com.example.rent_apartment.service.RentApartmentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+
+import java.time.LocalDateTime;
 
 import static com.example.rent_apartment.constant_project.ConstantProject.*;
 
@@ -16,13 +17,18 @@ public class RentApartmentController {
     @Autowired
     private RentApartmentService rentApartmentService;
 
+    @Autowired
+    private UserSession userSession;
 
-    /**Метод принимает цену и выгружает квартиры по этой цене и ниже*/
-    @GetMapping(GET_APARTMENT_BY_PRICE)
-    public GetAddressInfoResponseDto getApartmentInfo(@RequestParam String price) {
-        Long longPrice = Long.parseLong(price);
-        return rentApartmentService.getApartmentByPrice(longPrice);
-    }
+
+//    /**
+//     * Метод принимает цену и выгружает квартиры по этой цене и ниже
+//     * */
+//    @GetMapping(GET_APARTMENT_BY_PRICE)
+//    public GetAddressInfoResponseDto getApartmentInfo(@RequestParam String price) {
+//        Long longPrice = Long.parseLong(price);
+//        return rentApartmentService.getApartmentByPrice(longPrice);
+//    }
 
 
     /**
@@ -58,6 +64,19 @@ public class RentApartmentController {
     @PostMapping(GET_APARTMENT_BY_LOCATION)
     public GetAddressInfoResponseDto getApartmentsByLocation(@Valid @RequestBody PersonsLocation location) {
         return rentApartmentService.getApartmentsByLocation(location);
+    }
+
+    @GetMapping(GET_APARTMENT_BY_ID)
+    public ApartmentWithMessageDto getApartmentById(@RequestParam Long id,
+                                                    @RequestParam(required = false) LocalDateTime start,
+                                                    @RequestParam(required = false) LocalDateTime end) {
+        if(userSession.getNickName() == null) {
+            return new ApartmentWithMessageDto("Войдите в систему", null);
+        }
+
+        if(start == null && end == null) {
+            return rentApartmentService.getApartmentById(id);
+        } else return null;
     }
 
     //31.783272, 34.662766

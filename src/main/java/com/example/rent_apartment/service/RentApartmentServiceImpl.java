@@ -1,19 +1,13 @@
 package com.example.rent_apartment.service;
 
+import com.example.rent_apartment.application_exceptions.ApartmentException;
 import com.example.rent_apartment.integration.RestTemplateManager;
 import com.example.rent_apartment.mapper.ApplicationMapper;
-import com.example.rent_apartment.model.dto.AddressDto;
-import com.example.rent_apartment.model.dto.ApartmentDto;
-import com.example.rent_apartment.model.dto.GetAddressInfoResponseDto;
-import com.example.rent_apartment.model.dto.PersonsLocation;
+import com.example.rent_apartment.model.dto.*;
 import com.example.rent_apartment.model.entity.AddressEntity;
 import com.example.rent_apartment.model.entity.ApartmentEntity;
 import com.example.rent_apartment.repository.AddressRepository;
 import com.example.rent_apartment.repository.ApartmentRepository;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -23,11 +17,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.example.rent_apartment.config.CityTranslationStatic.getCityInRussianLanguage;
+import static com.example.rent_apartment.constant_project.ConstantProject.APARTMENT_STATUS_FALSE;
+import static com.example.rent_apartment.constant_project.ConstantProject.APARTMENT_STATUS_TRUE;
+
 
 @Service
 @RequiredArgsConstructor
@@ -37,7 +35,7 @@ public class RentApartmentServiceImpl implements RentApartmentService {
 
     private final ApartmentRepository apartmentRepository;
 
-    private final EntityManager entityManager;
+    private final EntityManager  entityManager;
 
     private final ApplicationMapper applicationMapper;
 
@@ -165,24 +163,32 @@ public class RentApartmentServiceImpl implements RentApartmentService {
         }
         String infoByLocation = restTemplateManager.getInfoByLocation(location); //ТУТ СОДЕРЖИТСЯ БОЛЬШОЙ JSON, КОТОРЫЙ ПРИШЕЛ НАМ ОТВЕТОМ ОТ ИНТЕГРАЦИОННОГО СЕРВИСА.
 
-//        String englishCity = parseLocationInfo(infoByLocation);
+        //String englishCity = parseLocationInfo(infoByLocation);
 
-        return getAddressByCity(getCityInRussianLanguage(englishCity));
+        return getAddressByCity(getCityInRussianLanguage(infoByLocation));
     }
 
-    /**Метод принимает больщой JSON и вытаскивает из него нужное нам поле city(на английском языке)*/
-//    private String parseLocationInfo(String locationInfo) {
-//        ObjectMapper objectMapper = new ObjectMapper();
-//        try {
-//            JsonNode jsonNode = objectMapper.readTree(locationInfo);
-//            return jsonNode.get("results").get(0).get("components").get("city").asText();
-//        } catch (JsonMappingException e) {
-//
-//        } catch (JsonProcessingException e) {
-//
-//        }
-//        return "Город не найден";
-//    }
+    @Override
+    public ApartmentWithMessageDto getApartmentById(Long id) {
+        ApartmentEntity apartmentEntity = apartmentRepository.findById(id).orElseThrow(() -> new ApartmentException());
+        if(apartmentEntity.getStatus().equals("false")) {
+            return new ApartmentWithMessageDto(APARTMENT_STATUS_FALSE, applicationMapper.apartmentEntityToApartmentDto(apartmentEntity));
+        }
+        return new ApartmentWithMessageDto(APARTMENT_STATUS_TRUE, applicationMapper.apartmentEntityToApartmentDto(apartmentEntity));
+    }
+
+    //TODO вынести в отдельный метод повторяющееся
+    @Override
+    public ApartmentWithMessageDto getBookingApartment(Long id, LocalDateTime start, LocalDateTime end) {
+        ApartmentEntity apartmentEntity = apartmentRepository.findById(id).orElseThrow(() -> new ApartmentException());
+        if(apartmentEntity.getStatus().equals("false")) {
+            return new ApartmentWithMessageDto(APARTMENT_STATUS_FALSE, applicationMapper.apartmentEntityToApartmentDto(apartmentEntity));
+        }
+        apartmentEntity.setStatus("false");
+        apartmentRepository.save(apartmentEntity);
+        return null;
+    }
+
 
     private List<ApartmentDto> apartmentEntityToDto(List<ApartmentEntity> apartmentEntityList) {
 
