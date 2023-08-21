@@ -21,16 +21,6 @@ public class RentApartmentController {
     private UserSession userSession;
 
 
-//    /**
-//     * Метод принимает цену и выгружает квартиры по этой цене и ниже
-//     * */
-//    @GetMapping(GET_APARTMENT_BY_PRICE)
-//    public GetAddressInfoResponseDto getApartmentInfo(@RequestParam String price) {
-//        Long longPrice = Long.parseLong(price);
-//        return rentApartmentService.getApartmentByPrice(longPrice);
-//    }
-
-
     /**
      * Метод выгружает пользователю квартиры по определенным параметрам
      */
