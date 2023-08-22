@@ -9,7 +9,7 @@ import java.util.List;
 @Getter
 @Setter
 @AllArgsConstructor
-public class GetAddressInfoResponseDto extends RentApartmentException {
+public class GetAddressInfoResponseDto extends WeatherOnRentPoint {
 
     private List<ApartmentDto> apartmentDtoList;
 

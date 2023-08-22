@@ -10,6 +10,7 @@ import javax.validation.Valid;
 import java.time.LocalDateTime;
 
 import static com.example.rent_apartment.constant_project.ConstantProject.*;
+import static java.util.Objects.isNull;
 
 @RestController
 public class RentApartmentController {
@@ -56,18 +57,21 @@ public class RentApartmentController {
         return rentApartmentService.getApartmentsByLocation(location);
     }
 
+
     @GetMapping(GET_APARTMENT_BY_ID)
     public ApartmentWithMessageDto getApartmentById(@RequestParam Long id,
                                                     @RequestParam(required = false) LocalDateTime start,
                                                     @RequestParam(required = false) LocalDateTime end) {
-        if(userSession.getNickName() == null) {
+        if(isNull(userSession.getNickName())) {
             return new ApartmentWithMessageDto("Войдите в систему", null);
         }
 
-        if(start == null && end == null) {
+        if(isNull(start) && isNull(end)) {
             return rentApartmentService.getApartmentById(id);
         } else return null;
     }
+
+
 
     //31.783272, 34.662766
     //обычный коммент

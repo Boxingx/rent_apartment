@@ -161,11 +161,21 @@ public class RentApartmentServiceImpl implements RentApartmentService {
             getAddressInfoResponseDto.setExceptionMessage("Неизвестная локация");
             return getAddressInfoResponseDto;
         }
-        String infoByLocation = restTemplateManager.getInfoByLocation(location); //ТУТ СОДЕРЖИТСЯ БОЛЬШОЙ JSON, КОТОРЫЙ ПРИШЕЛ НАМ ОТВЕТОМ ОТ ИНТЕГРАЦИОННОГО СЕРВИСА.
+        YandexWeatherResponse weather = getWeatherByLocation(location);
+        String infoByLocation = restTemplateManager.getInfoByLocation(location); //ТУТ СОДЕРЖИТСЯ БОЛЬШОЙ JSON В СТРОКЕ, КОТОРЫЙ ПРИШЕЛ НАМ ОТВЕТОМ ОТ ИНТЕГРАЦИОННОГО СЕРВИСА.
 
         //String englishCity = parseLocationInfo(infoByLocation);
 
-        return getAddressByCity(getCityInRussianLanguage(infoByLocation));
+        GetAddressInfoResponseDto addressByCity = getAddressByCity(getCityInRussianLanguage(infoByLocation));
+
+        addressByCity.setTemp(weather.getFactWeather().getTemp());
+        addressByCity.setCondition(weather.getFactWeather().getCondition());
+        return addressByCity;
+    }
+
+    private YandexWeatherResponse getWeatherByLocation(PersonsLocation location) {
+        YandexWeatherResponse weatherByLocation = restTemplateManager.getWeatherByLocation(location);
+        return weatherByLocation;
     }
 
     @Override
