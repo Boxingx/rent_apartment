@@ -13,6 +13,5 @@ public class AddressDto {
 
     private String apartmentsNumber;
 
-    private ApartmentDto apartmentDto;
 
 }

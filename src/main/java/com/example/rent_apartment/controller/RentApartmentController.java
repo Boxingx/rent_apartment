@@ -6,8 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 
 import static com.example.rent_apartment.constant_project.ConstantProject.*;
 import static java.util.Objects.isNull;
@@ -45,32 +45,41 @@ public class RentApartmentController {
         if (price == null && roomsCount == null && averageRating != null) {
             return rentApartmentService.findApartmentEntitiesByAverageRatingAndAddressEntity_City(cityName, averageRating);
         }
-        return null;
+        return new GetAddressInfoResponseDto(new ArrayList<>());
     }
 
     /**
      * Метод выгружает квартиры по выбранной локации
-     *
-     * */
+     */
     @PostMapping(GET_APARTMENT_BY_LOCATION)
     public GetAddressInfoResponseDto getApartmentsByLocation(@Valid @RequestBody PersonsLocation location) {
         return rentApartmentService.getApartmentsByLocation(location);
     }
 
 
+    /**
+     * Метод позволяет просто посмотреть квартиру по id, либо забронировать ее указав id, дату старта и окончания бронирования
+     * */
     @GetMapping(GET_APARTMENT_BY_ID)
     public ApartmentWithMessageDto getApartmentById(@RequestParam Long id,
                                                     @RequestParam(required = false) LocalDateTime start,
                                                     @RequestParam(required = false) LocalDateTime end) {
         if(isNull(userSession.getNickName())) {
-            return new ApartmentWithMessageDto("Войдите в систему", null);
+            return new ApartmentWithMessageDto(SIGN_IN, null);
         }
 
         if(isNull(start) && isNull(end)) {
             return rentApartmentService.getApartmentById(id);
-        } else return null;
+        } else return new ApartmentWithMessageDto();
     }
 
+    /**
+     * Метод позволяет добавить новые квартиры.
+     * */
+    @PostMapping(ADD_NEW_APARTMENT)
+    public ApartmentWithMessageDto addNewApartment(@RequestBody ApartmentDto apartmentDto) {
+        return rentApartmentService.registrationNewApartment(apartmentDto);
+    }
 
 
     //31.783272, 34.662766

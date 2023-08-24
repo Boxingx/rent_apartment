@@ -3,6 +3,8 @@ package com.example.rent_apartment.config;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.example.rent_apartment.constant_project.ConstantProject.NOT_HAVE_APARTMENT_IN_THIS_CITY;
+
 /**Класс со статической мапой, статическим блоком который инициализирует мапу и со статическим методом который
  * принимает город на английском языке(как ключ) и отдает значение по заданному ключу в виде города, но уже на русском языке
  * */
@@ -25,6 +27,6 @@ public class CityTranslationStatic {
     }
 
     public static String getCityInRussianLanguage(String englishCity) {
-        return cityTranslationMap.getOrDefault(englishCity,"Нет квартир в этом городее.");
+        return cityTranslationMap.getOrDefault(englishCity,NOT_HAVE_APARTMENT_IN_THIS_CITY);
     }
 }

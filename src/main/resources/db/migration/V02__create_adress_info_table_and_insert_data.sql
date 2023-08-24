@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS address_info (
                                             apartment_id int8 REFERENCES apartment_info(id)
 );
 
-CREATE SEQUENCE address_info_sequence start 3 increment 1;
+CREATE SEQUENCE address_info_sequence start 16 increment 1;
 
 INSERT INTO address_info (id, city, street, building_number, apartments_number, apartment_id)
 VALUES(1, 'Москва', 'Ленина', '25' , '42', 1),

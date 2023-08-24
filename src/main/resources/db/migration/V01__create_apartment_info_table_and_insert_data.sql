@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS apartment_info (
                                               registration_date varchar
 );
 
-CREATE SEQUENCE apartment_info_sequence start 3 increment 1;
+CREATE SEQUENCE apartment_info_sequence start 16 increment 1;
 
 INSERT INTO apartment_info (id, rooms_count, average_rating, price, status, registration_date)
 VALUES(1, '4', null,'5000','true', null),

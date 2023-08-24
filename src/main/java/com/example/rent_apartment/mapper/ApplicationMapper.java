@@ -4,7 +4,9 @@ import com.example.rent_apartment.model.dto.AddressDto;
 import com.example.rent_apartment.model.dto.ApartmentDto;
 import com.example.rent_apartment.model.entity.AddressEntity;
 import com.example.rent_apartment.model.entity.ApartmentEntity;
+import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
+import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
 public interface ApplicationMapper {
@@ -21,5 +23,8 @@ public interface ApplicationMapper {
 
     ApartmentDto apartmentEntityToApartmentDto(ApartmentEntity apartmentEntity);
 
+    ApartmentEntity apartmentDtoToApartmentEntity(ApartmentDto apartmentDto);
+
+    AddressEntity addressDtoToAddressEntity(AddressDto addressDto);
 
 }

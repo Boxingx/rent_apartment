@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+import static com.example.rent_apartment.constant_project.ConstantProject.*;
+
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
@@ -21,27 +23,27 @@ public class AuthServiceImpl implements AuthService {
     public String registration(ClientApplicationEntity clientApplicationEntity) {
         List<ClientApplicationEntity> resultNickName = clientRepository.getClientApplicationEntitiesByNickName(clientApplicationEntity.getNickName());
         if (!resultNickName.isEmpty()) {
-            return "Пользователь с таким никнеймом уже существует";
+            return NICKNAME_IS_TAKEN;
         }
         List<ClientApplicationEntity> resultMail = clientRepository.getClientApplicationEntitiesByLoginMail(clientApplicationEntity.getLoginMail());
         if(!resultMail.isEmpty()) {
-            return "Пользователь с таким логином уже существует";
+            return LOGIN_IS_TAKEN;
         }
         clientRepository.save(clientApplicationEntity);
-        return "Пользователь успешно зарегистрирован";
+        return REGISTRATION_SUCCESSFUL;
     }
 
     @Override
     public String auth(AuthDto authDto) {
         List<ClientApplicationEntity> result = clientRepository.getClientApplicationEntitiesByLoginMail(authDto.getLogin());
         if(result.isEmpty()) {
-            return "Пользователя не существует";
+            return USER_NOT_EXIST;
         }
         if(result.get(0).getPassword().equals(authDto.getPassword())) {
             userSession.setNickName(result.get(0).getNickName());
             userSession.setLogin(result.get(0).getLoginMail());
-            return "Добро пожаловать";
+            return WELCOME;
         }
-        return "Неправильный пароль";
+        return WRONG_PASSWORD;
     }
 }

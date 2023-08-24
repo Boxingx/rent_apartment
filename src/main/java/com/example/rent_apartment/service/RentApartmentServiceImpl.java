@@ -4,6 +4,7 @@ import com.example.rent_apartment.application_exceptions.ApartmentException;
 import com.example.rent_apartment.integration.RestTemplateManager;
 import com.example.rent_apartment.mapper.ApplicationMapper;
 import com.example.rent_apartment.model.dto.*;
+import com.example.rent_apartment.model.dto.yandex_integration.YandexWeatherResponse;
 import com.example.rent_apartment.model.entity.AddressEntity;
 import com.example.rent_apartment.model.entity.ApartmentEntity;
 import com.example.rent_apartment.repository.AddressRepository;
@@ -18,13 +19,13 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.example.rent_apartment.config.CityTranslationStatic.getCityInRussianLanguage;
-import static com.example.rent_apartment.constant_project.ConstantProject.APARTMENT_STATUS_FALSE;
-import static com.example.rent_apartment.constant_project.ConstantProject.APARTMENT_STATUS_TRUE;
+import static com.example.rent_apartment.constant_project.ConstantProject.*;
 
 
 @Service
@@ -41,14 +42,16 @@ public class RentApartmentServiceImpl implements RentApartmentService {
 
     private final RestTemplateManager restTemplateManager;
 
+    public DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+
     @Override
     public GetAddressInfoResponseDto getAddressByCity(String cityName) {
         List<ApartmentEntity> addressInformation = apartmentRepository.findApartmentEntitiesByAddressEntity_City(cityName);
 
         if (addressInformation.isEmpty()) {
             GetAddressInfoResponseDto getAddressInfoResponseDto = new GetAddressInfoResponseDto(null);
-            getAddressInfoResponseDto.setExceptionCode("getAddressByCity");
-            getAddressInfoResponseDto.setExceptionMessage("Нет квартир в этом городе");
+            getAddressInfoResponseDto.setExceptionCode(ERROR_CODE_250);
+            getAddressInfoResponseDto.setExceptionMessage(NOT_HAVE_APARTMENT_IN_THIS_CITY);
             return getAddressInfoResponseDto;
         }
         return new GetAddressInfoResponseDto(apartmentEntityToDto(addressInformation));
@@ -70,8 +73,8 @@ public class RentApartmentServiceImpl implements RentApartmentService {
         List<ApartmentEntity> apartmentEntityList = apartmentRepository.getApartmentInfo(price);
         if (apartmentEntityList.isEmpty()) {
             GetAddressInfoResponseDto getAddressInfoResponseDto = new GetAddressInfoResponseDto(null);
-            getAddressInfoResponseDto.setExceptionCode("getApartmentByPrice");
-            getAddressInfoResponseDto.setExceptionMessage("Нет квартир с ценой " + price);
+            getAddressInfoResponseDto.setExceptionCode(ERROR_CODE_255);
+            getAddressInfoResponseDto.setExceptionMessage(NO_APT_WITH_THIS_PRICE + price);
             return getAddressInfoResponseDto;
         }
         return new GetAddressInfoResponseDto(apartmentEntityToDto(apartmentEntityList));
@@ -81,8 +84,8 @@ public class RentApartmentServiceImpl implements RentApartmentService {
         List<ApartmentEntity> apartmentEntityList = apartmentRepository.findApartmentEntitiesByRoomsCountAndAddressEntity_City(roomsCount, city);
         if (apartmentEntityList.isEmpty()) {
             GetAddressInfoResponseDto getAddressInfoResponseDto = new GetAddressInfoResponseDto(null);
-            getAddressInfoResponseDto.setExceptionCode("getApartmentByCityAndRoomsCount");
-            getAddressInfoResponseDto.setExceptionMessage("Нет квартир в городе " + city + " c количеством комнат " + roomsCount);
+            getAddressInfoResponseDto.setExceptionCode(ERROR_CODE_255);
+            getAddressInfoResponseDto.setExceptionMessage(NO_APARTMENT_IN_CITY_AND + city + WITH_PRICE + roomsCount);
             return getAddressInfoResponseDto;
         }
         return new GetAddressInfoResponseDto(apartmentEntityToDto(apartmentEntityList));
@@ -93,8 +96,8 @@ public class RentApartmentServiceImpl implements RentApartmentService {
         List<ApartmentEntity> apartmentEntityList = apartmentRepository.findApartmentEntitiesByPriceAndAddressEntity_City(price, city);
         if (apartmentEntityList.isEmpty()) {
             GetAddressInfoResponseDto getAddressInfoResponseDto = new GetAddressInfoResponseDto(null);
-            getAddressInfoResponseDto.setExceptionCode("getApartmentByCityAndPrice");
-            getAddressInfoResponseDto.setExceptionMessage("Нет квартир в городе " + city + " c ценой " + price);
+            getAddressInfoResponseDto.setExceptionCode(ERROR_CODE_255);
+            getAddressInfoResponseDto.setExceptionMessage(NO_APARTMENT_IN_CITY_AND + city + WITH_PRICE + price);
             return getAddressInfoResponseDto;
         }
         return new GetAddressInfoResponseDto(apartmentEntityToDto(apartmentEntityList));
@@ -105,8 +108,8 @@ public class RentApartmentServiceImpl implements RentApartmentService {
         List<ApartmentEntity> apartmentEntitiesList = apartmentRepository.findApartmentEntitiesByRoomsCountAndPriceAndAddressEntity_City(roomsCount, price, city);
         if (apartmentEntitiesList.isEmpty()) {
             GetAddressInfoResponseDto getAddressInfoResponseDto = new GetAddressInfoResponseDto(null);
-            getAddressInfoResponseDto.setExceptionCode("getApartmentByCityAndPriceAndRoomsCount");
-            getAddressInfoResponseDto.setExceptionMessage("Нет квартир в городе " + city + " c ценой " + price + " и количеством комнат " + roomsCount);
+            getAddressInfoResponseDto.setExceptionCode(ERROR_CODE_255);
+            getAddressInfoResponseDto.setExceptionMessage(NO_APARTMENT_IN_CITY_AND + city + WITH_PRICE + price + AND_ROOMS_COUNT + roomsCount);
             return getAddressInfoResponseDto;
         }
         return new GetAddressInfoResponseDto(apartmentEntityToDto(apartmentEntitiesList));
@@ -125,8 +128,8 @@ public class RentApartmentServiceImpl implements RentApartmentService {
         List<ApartmentEntity> apartmentListAfterChange = new ArrayList<>();
 
         if (apartmentList.isEmpty()) {
-            getAddressInfoResponseDto.setExceptionCode("404");
-            getAddressInfoResponseDto.setExceptionMessage("Апартаментов по условиям фильтра \"город\" не найдено");
+            getAddressInfoResponseDto.setExceptionCode(ERROR_CODE_255);
+            getAddressInfoResponseDto.setExceptionMessage(NO_APARTMENT_WITH_CITY_FILTER);
             return getAddressInfoResponseDto;
         }
 
@@ -142,8 +145,8 @@ public class RentApartmentServiceImpl implements RentApartmentService {
         List<ApartmentEntity> result = apartmentListAfterChange.stream().filter(o -> Integer.parseInt(o.getAverageRating()) <= Integer.parseInt(averageRating)).collect(Collectors.toList());
 
         if (result.isEmpty()) {
-            getAddressInfoResponseDto.setExceptionCode("404");
-            getAddressInfoResponseDto.setExceptionMessage("Апартаментов по условиям фильтра \"рейтинга\" не найдено");
+            getAddressInfoResponseDto.setExceptionCode(ERROR_CODE_255);
+            getAddressInfoResponseDto.setExceptionMessage(NO_APARTMENT_WITH_RATING_FILTER);
             return getAddressInfoResponseDto;
         }
         getAddressInfoResponseDto.setApartmentDtoList(apartmentEntityToDto(result));
@@ -157,8 +160,8 @@ public class RentApartmentServiceImpl implements RentApartmentService {
     public GetAddressInfoResponseDto getApartmentsByLocation(PersonsLocation location) {
         GetAddressInfoResponseDto getAddressInfoResponseDto = new GetAddressInfoResponseDto(null);
         if (location == null) {
-            getAddressInfoResponseDto.setExceptionCode("404");
-            getAddressInfoResponseDto.setExceptionMessage("Неизвестная локация");
+            getAddressInfoResponseDto.setExceptionCode(ERROR_CODE_255);
+            getAddressInfoResponseDto.setExceptionMessage(LOCATION_UNKNOWN);
             return getAddressInfoResponseDto;
         }
         YandexWeatherResponse weather = getWeatherByLocation(location);
@@ -199,6 +202,20 @@ public class RentApartmentServiceImpl implements RentApartmentService {
         return null;
     }
 
+    @Override
+    public ApartmentWithMessageDto registrationNewApartment(ApartmentDto apartmentDto) {
+
+        ApartmentEntity apartmentEntity = applicationMapper.apartmentDtoToApartmentEntity(apartmentDto);
+        apartmentEntity.setRegistrationDate(LocalDateTime.now().format(formatter));
+        apartmentRepository.save(apartmentEntity);
+        AddressEntity AddressEntity = applicationMapper.addressDtoToAddressEntity(apartmentDto.getAddressDto());
+        AddressEntity.setApartmentEntity(apartmentEntity);
+        addressRepository.save(AddressEntity);
+
+        return new ApartmentWithMessageDto(APARTMENT_SAVED, apartmentDto);
+
+    }
+
 
     private List<ApartmentDto> apartmentEntityToDto(List<ApartmentEntity> apartmentEntityList) {
 
@@ -214,28 +231,4 @@ public class RentApartmentServiceImpl implements RentApartmentService {
         }
         return resultList;
     }
-
-    private List<AddressDto> prepareRequestByAddressInfo(List<AddressEntity> listEntity) {
-
-        List<AddressDto> resultList = new ArrayList<>();
-
-        for (AddressEntity e : listEntity) {
-
-            ApartmentDto apartmentDto = new ApartmentDto();
-            apartmentDto.setPrice(e.getApartmentEntity().getPrice());
-            apartmentDto.setStatus(e.getApartmentEntity().getStatus());
-            apartmentDto.setAverageRating(e.getApartmentEntity().getAverageRating());
-            apartmentDto.setRoomsCount(e.getApartmentEntity().getRoomsCount());
-
-            AddressDto addressDto = new AddressDto();
-            addressDto.setCity(e.getCity());
-            addressDto.setStreet(e.getStreet());
-            addressDto.setBuildingNumber(e.getBuildingNumber());
-            addressDto.setApartmentsNumber(e.getApartmentsNumber());
-            addressDto.setApartmentDto(apartmentDto);
-            resultList.add(addressDto);
-        }
-        return resultList;
-    }
-
 }

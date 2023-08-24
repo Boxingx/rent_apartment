@@ -4,11 +4,11 @@ import com.example.rent_apartment.model.dto.ApartmentDto;
 import com.example.rent_apartment.model.dto.ApartmentWithMessageDto;
 import com.example.rent_apartment.model.dto.GetAddressInfoResponseDto;
 import com.example.rent_apartment.model.dto.PersonsLocation;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.LocalDateTime;
 
 public interface RentApartmentService {
+
     GetAddressInfoResponseDto getAddressByCity(String cityName);
 
     GetAddressInfoResponseDto getApartmentByPrice(Long price);
@@ -26,4 +26,8 @@ public interface RentApartmentService {
     ApartmentWithMessageDto getApartmentById(Long id);
 
     ApartmentWithMessageDto getBookingApartment(Long id, LocalDateTime start, LocalDateTime end);
+
+    ApartmentWithMessageDto registrationNewApartment(ApartmentDto apartmentDto);
+
 }
+
