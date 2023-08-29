@@ -11,6 +11,7 @@ import java.util.ArrayList;
 
 import static com.example.rent_apartment.constant_project.ConstantProject.*;
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 @RestController
 public class RentApartmentController {
@@ -56,7 +57,6 @@ public class RentApartmentController {
         return rentApartmentService.getApartmentsByLocation(location);
     }
 
-
     /**
      * Метод позволяет просто посмотреть квартиру по id, либо забронировать ее указав id, дату старта и окончания бронирования
      * */
@@ -70,7 +70,12 @@ public class RentApartmentController {
 
         if(isNull(start) && isNull(end)) {
             return rentApartmentService.getApartmentById(id);
-        } else return new ApartmentWithMessageDto();
+        }
+        if(nonNull(start) && nonNull(end)) {
+            return rentApartmentService.bookApartment(id, start, end);
+        }
+
+        else return new ApartmentWithMessageDto();
     }
 
     /**
@@ -78,6 +83,9 @@ public class RentApartmentController {
      * */
     @PostMapping(ADD_NEW_APARTMENT)
     public ApartmentWithMessageDto addNewApartment(@RequestBody ApartmentDto apartmentDto) {
+        if(isNull(userSession.getNickName())) {
+            return new ApartmentWithMessageDto(SIGN_IN, null);
+        }
         return rentApartmentService.registrationNewApartment(apartmentDto);
     }
 

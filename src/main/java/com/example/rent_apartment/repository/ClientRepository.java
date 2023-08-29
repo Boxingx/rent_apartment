@@ -13,5 +13,4 @@ public interface ClientRepository extends JpaRepository <ClientApplicationEntity
 
     List<ClientApplicationEntity> getClientApplicationEntitiesByLoginMail (String loginMail);
 
-
 }

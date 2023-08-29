@@ -51,5 +51,6 @@ public class ConstantProject {
     public final static String NO_APARTMENT_IN_CITY_AND = "Нет квартир в городе ";
     public final static String WITH_PRICE = " c ценой ";
     public final static String AND_ROOMS_COUNT = " и количеством комнат ";
+    public final static String ROOMS_COUNT = " с количеством комнат ";
 
 }

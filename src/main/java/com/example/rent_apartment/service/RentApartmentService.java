@@ -29,5 +29,6 @@ public interface RentApartmentService {
 
     ApartmentWithMessageDto registrationNewApartment(ApartmentDto apartmentDto);
 
+    ApartmentWithMessageDto bookApartment(Long id, LocalDateTime start, LocalDateTime end);
 }
 

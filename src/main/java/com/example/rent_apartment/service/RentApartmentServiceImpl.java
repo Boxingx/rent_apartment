@@ -7,8 +7,12 @@ import com.example.rent_apartment.model.dto.*;
 import com.example.rent_apartment.model.dto.yandex_integration.YandexWeatherResponse;
 import com.example.rent_apartment.model.entity.AddressEntity;
 import com.example.rent_apartment.model.entity.ApartmentEntity;
+import com.example.rent_apartment.model.entity.BookingHistoryEntity;
+import com.example.rent_apartment.model.entity.ClientApplicationEntity;
 import com.example.rent_apartment.repository.AddressRepository;
 import com.example.rent_apartment.repository.ApartmentRepository;
+import com.example.rent_apartment.repository.BookingHistoryRepository;
+import com.example.rent_apartment.repository.ClientRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -41,6 +45,12 @@ public class RentApartmentServiceImpl implements RentApartmentService {
     private final ApplicationMapper applicationMapper;
 
     private final RestTemplateManager restTemplateManager;
+
+    private final UserSession userSession;
+
+    private final ClientRepository clientRepository;
+
+    private final BookingHistoryRepository bookingHistoryRepository;
 
     public DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
@@ -85,7 +95,7 @@ public class RentApartmentServiceImpl implements RentApartmentService {
         if (apartmentEntityList.isEmpty()) {
             GetAddressInfoResponseDto getAddressInfoResponseDto = new GetAddressInfoResponseDto(null);
             getAddressInfoResponseDto.setExceptionCode(ERROR_CODE_255);
-            getAddressInfoResponseDto.setExceptionMessage(NO_APARTMENT_IN_CITY_AND + city + WITH_PRICE + roomsCount);
+            getAddressInfoResponseDto.setExceptionMessage(NO_APARTMENT_IN_CITY_AND + city + ROOMS_COUNT + roomsCount);
             return getAddressInfoResponseDto;
         }
         return new GetAddressInfoResponseDto(apartmentEntityToDto(apartmentEntityList));
@@ -214,6 +224,40 @@ public class RentApartmentServiceImpl implements RentApartmentService {
 
         return new ApartmentWithMessageDto(APARTMENT_SAVED, apartmentDto);
 
+    }
+
+    @Override
+    public ApartmentWithMessageDto bookApartment(Long id, LocalDateTime start, LocalDateTime end) {
+
+        ApartmentEntity apartmentEntityById = apartmentRepository.getApartmentEntityById(id);
+
+        ApartmentWithMessageDto apartmentById = getApartmentById(id);
+        String sessionNickName = userSession.getNickName();
+
+        if(apartmentEntityById.getStatus().equals("false")) {
+            return new ApartmentWithMessageDto("Квартира занята", null);
+        }
+
+        if(apartmentEntityById.getStatus().equals("true")) {
+
+
+            apartmentEntityById.setStatus("false");
+            apartmentRepository.save(apartmentEntityById);
+
+            List<ClientApplicationEntity> clientApplicationEntitiesByNickName = clientRepository.getClientApplicationEntitiesByNickName(sessionNickName);
+            ClientApplicationEntity clientApplicationEntity = clientApplicationEntitiesByNickName.get(0);
+
+            BookingHistoryEntity bookingHistoryEntity = new BookingHistoryEntity();
+            bookingHistoryEntity.setApartmentEntity(apartmentEntityById);
+            bookingHistoryEntity.setClientApplicationEntity(clientApplicationEntity);
+            bookingHistoryEntity.setStartDate(start);
+            bookingHistoryEntity.setEndDate(end);
+            bookingHistoryRepository.save(bookingHistoryEntity);
+
+            return new ApartmentWithMessageDto("Квартира забронирована c даты " + start + " по " + end , apartmentById.getApartmentDto());
+        }
+
+        return new ApartmentWithMessageDto();
     }
 
 

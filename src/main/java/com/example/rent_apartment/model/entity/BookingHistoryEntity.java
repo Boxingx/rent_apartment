@@ -1,11 +1,13 @@
 package com.example.rent_apartment.model.entity;
 
 import jakarta.persistence.*;
+import lombok.Data;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "booking_history")
+@Data
 public class BookingHistoryEntity {
 
     @Id

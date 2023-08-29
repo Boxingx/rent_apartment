@@ -36,4 +36,5 @@ public interface ApartmentRepository extends JpaRepository<ApartmentEntity, Long
     @Query(nativeQuery = true, value = "SELECT * FROM apartment_info where id = :apartmentId and average_rating = :averageRating")
     ApartmentEntity getApartmentEntitiesByIdAndAverageRating(Long apartmentId, String averageRating);
 
+    ApartmentEntity getApartmentEntityById(Long id);
 }
