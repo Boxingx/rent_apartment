@@ -3,7 +3,10 @@ package com.example.rent_apartment.controller;
 import com.example.rent_apartment.model.dto.*;
 import com.example.rent_apartment.service.RentApartmentService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
 import javax.validation.Valid;
 import java.time.LocalDateTime;
@@ -59,35 +62,35 @@ public class RentApartmentController {
 
     /**
      * Метод позволяет просто посмотреть квартиру по id, либо забронировать ее указав id, дату старта и окончания бронирования
-     * */
+     */
     @GetMapping(GET_APARTMENT_BY_ID)
     public ApartmentWithMessageDto getApartmentById(@RequestParam Long id,
                                                     @RequestParam(required = false) LocalDateTime start,
                                                     @RequestParam(required = false) LocalDateTime end) {
-        if(isNull(userSession.getNickName())) {
+        if (isNull(userSession.getNickName())) {
             return new ApartmentWithMessageDto(SIGN_IN, null);
         }
 
-        if(isNull(start) && isNull(end)) {
+        if (isNull(start) && isNull(end)) {
             return rentApartmentService.getApartmentById(id);
         }
-        if(nonNull(start) && nonNull(end)) {
+        if (nonNull(start) && nonNull(end)) {
             return rentApartmentService.bookApartment(id, start, end);
-        }
-
-        else return new ApartmentWithMessageDto();
+        } else return new ApartmentWithMessageDto();
     }
 
     /**
      * Метод позволяет добавить новые квартиры.
-     * */
+     */
     @PostMapping(ADD_NEW_APARTMENT)
     public ApartmentWithMessageDto addNewApartment(@RequestBody ApartmentDto apartmentDto) {
-        if(isNull(userSession.getNickName())) {
+        if (isNull(userSession.getNickName())) {
             return new ApartmentWithMessageDto(SIGN_IN, null);
         }
         return rentApartmentService.registrationNewApartment(apartmentDto);
     }
+
+
 
 
     //31.783272, 34.662766

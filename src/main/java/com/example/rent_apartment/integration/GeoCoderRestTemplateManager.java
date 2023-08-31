@@ -23,7 +23,7 @@ import static com.example.rent_apartment.constant_project.ConstantProject.NO_INT
 
 @Service
 @RequiredArgsConstructor
-public class RestTemplateManager {
+public class GeoCoderRestTemplateManager {
 
     private final IntegrationRepository integrationRepository;
 

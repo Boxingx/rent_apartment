@@ -1,7 +1,8 @@
 package com.example.rent_apartment.service;
 
 import com.example.rent_apartment.application_exceptions.ApartmentException;
-import com.example.rent_apartment.integration.RestTemplateManager;
+import com.example.rent_apartment.integration.GeoCoderRestTemplateManager;
+import com.example.rent_apartment.integration.ProductRestTemplateManager;
 import com.example.rent_apartment.mapper.ApplicationMapper;
 import com.example.rent_apartment.model.dto.*;
 import com.example.rent_apartment.model.dto.yandex_integration.YandexWeatherResponse;
@@ -40,17 +41,19 @@ public class RentApartmentServiceImpl implements RentApartmentService {
 
     private final ApartmentRepository apartmentRepository;
 
-    private final EntityManager  entityManager;
+    private final EntityManager entityManager;
 
     private final ApplicationMapper applicationMapper;
 
-    private final RestTemplateManager restTemplateManager;
+    private final GeoCoderRestTemplateManager restTemplateManager;
 
     private final UserSession userSession;
 
     private final ClientRepository clientRepository;
 
     private final BookingHistoryRepository bookingHistoryRepository;
+
+    private final ProductRestTemplateManager productRestTemplateManager;
 
     public DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
@@ -163,9 +166,11 @@ public class RentApartmentServiceImpl implements RentApartmentService {
         return getAddressInfoResponseDto;
     }
 
-    /**Метод принимает объект с координатами, в случае если объект пустой устанавливается код ошибки и сообщение об ошибке, а если
+    /**
+     * Метод принимает объект с координатами, в случае если объект пустой устанавливается код ошибки и сообщение об ошибке, а если
      * не пустой то получаем JSON из которого вытаскивается нужное поле city(на англ языке) парсится на русский язык с помощью метода getCityInRussianLanguage
-     * класса CityTranslationStatic и происходит поиск апартаметов по городу который мы в итоге получили.*/
+     * класса CityTranslationStatic и происходит поиск апартаметов по городу который мы в итоге получили.
+     */
     @Override
     public GetAddressInfoResponseDto getApartmentsByLocation(PersonsLocation location) {
         GetAddressInfoResponseDto getAddressInfoResponseDto = new GetAddressInfoResponseDto(null);
@@ -194,7 +199,7 @@ public class RentApartmentServiceImpl implements RentApartmentService {
     @Override
     public ApartmentWithMessageDto getApartmentById(Long id) {
         ApartmentEntity apartmentEntity = apartmentRepository.findById(id).orElseThrow(() -> new ApartmentException());
-        if(apartmentEntity.getStatus().equals("false")) {
+        if (apartmentEntity.getStatus().equals("false")) {
             return new ApartmentWithMessageDto(APARTMENT_STATUS_FALSE, applicationMapper.apartmentEntityToApartmentDto(apartmentEntity));
         }
         return new ApartmentWithMessageDto(APARTMENT_STATUS_TRUE, applicationMapper.apartmentEntityToApartmentDto(apartmentEntity));
@@ -204,7 +209,7 @@ public class RentApartmentServiceImpl implements RentApartmentService {
     @Override
     public ApartmentWithMessageDto getBookingApartment(Long id, LocalDateTime start, LocalDateTime end) {
         ApartmentEntity apartmentEntity = apartmentRepository.findById(id).orElseThrow(() -> new ApartmentException());
-        if(apartmentEntity.getStatus().equals("false")) {
+        if (apartmentEntity.getStatus().equals("false")) {
             return new ApartmentWithMessageDto(APARTMENT_STATUS_FALSE, applicationMapper.apartmentEntityToApartmentDto(apartmentEntity));
         }
         apartmentEntity.setStatus("false");
@@ -231,33 +236,35 @@ public class RentApartmentServiceImpl implements RentApartmentService {
 
         ApartmentEntity apartmentEntityById = apartmentRepository.getApartmentEntityById(id);
 
-        ApartmentWithMessageDto apartmentById = getApartmentById(id);
-        String sessionNickName = userSession.getNickName();
-
-        if(apartmentEntityById.getStatus().equals("false")) {
+        if (apartmentEntityById.getStatus().equals("false")) {
             return new ApartmentWithMessageDto("Квартира занята", null);
         }
 
-        if(apartmentEntityById.getStatus().equals("true")) {
+
+        apartmentEntityById.setStatus("false");
+        apartmentRepository.save(apartmentEntityById);
+
+        ApartmentWithMessageDto apartmentById = getApartmentById(id);
+        String sessionNickName = userSession.getNickName();
 
 
-            apartmentEntityById.setStatus("false");
-            apartmentRepository.save(apartmentEntityById);
+        List<ClientApplicationEntity> clientApplicationEntitiesByNickName = clientRepository.getClientApplicationEntitiesByNickName(sessionNickName);
+        ClientApplicationEntity clientApplicationEntity = clientApplicationEntitiesByNickName.get(0);
 
-            List<ClientApplicationEntity> clientApplicationEntitiesByNickName = clientRepository.getClientApplicationEntitiesByNickName(sessionNickName);
-            ClientApplicationEntity clientApplicationEntity = clientApplicationEntitiesByNickName.get(0);
 
-            BookingHistoryEntity bookingHistoryEntity = new BookingHistoryEntity();
-            bookingHistoryEntity.setApartmentEntity(apartmentEntityById);
-            bookingHistoryEntity.setClientApplicationEntity(clientApplicationEntity);
-            bookingHistoryEntity.setStartDate(start);
-            bookingHistoryEntity.setEndDate(end);
-            bookingHistoryRepository.save(bookingHistoryEntity);
+        BookingHistoryEntity bookingHistoryEntity = new BookingHistoryEntity();
+        bookingHistoryEntity.setApartmentEntity(apartmentEntityById);
+        bookingHistoryEntity.setClientApplicationEntity(clientApplicationEntity);
+        bookingHistoryEntity.setStartDate(start);
+        bookingHistoryEntity.setEndDate(end);
+        bookingHistoryRepository.save(bookingHistoryEntity);
 
-            return new ApartmentWithMessageDto("Квартира забронирована c даты " + start + " по " + end , apartmentById.getApartmentDto());
+        try {
+            productRestTemplateManager.prepareProduct(bookingHistoryEntity.getId());
+            return new ApartmentWithMessageDto("Квартира забронирована c даты " + start + " по " + end, apartmentById.getApartmentDto());
+        } catch (Exception e) {
+            return new ApartmentWithMessageDto("Квартира забронирована c даты " + start + " по " + end + "без расчета скидки", apartmentById.getApartmentDto());
         }
-
-        return new ApartmentWithMessageDto();
     }
 
 
