@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
 import javax.validation.Valid;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
@@ -65,8 +66,9 @@ public class RentApartmentController {
      */
     @GetMapping(GET_APARTMENT_BY_ID)
     public ApartmentWithMessageDto getApartmentById(@RequestParam Long id,
-                                                    @RequestParam(required = false) LocalDateTime start,
-                                                    @RequestParam(required = false) LocalDateTime end) {
+                                                    @RequestParam(required = false) LocalDate start,
+                                                    @RequestParam(required = false) LocalDate end,
+                                                    @RequestParam(required = false) String promoCode) {
         if (isNull(userSession.getNickName())) {
             return new ApartmentWithMessageDto(SIGN_IN, null);
         }
@@ -76,6 +78,8 @@ public class RentApartmentController {
         }
         if (nonNull(start) && nonNull(end)) {
             return rentApartmentService.bookApartment(id, start, end);
+        } if (nonNull(start) && nonNull(end) && nonNull(promoCode)) {
+            return rentApartmentService.bookApartmentPromoCode(id, start, end, promoCode);
         } else return new ApartmentWithMessageDto();
     }
 

@@ -1,4 +1,4 @@
-package com.example.rent_apartment.model.dto.yandex_integration;
+package com.example.rent_apartment.model.dto.yandex_weather_ntegration;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;

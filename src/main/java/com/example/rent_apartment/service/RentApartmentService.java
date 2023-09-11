@@ -5,6 +5,7 @@ import com.example.rent_apartment.model.dto.ApartmentWithMessageDto;
 import com.example.rent_apartment.model.dto.GetAddressInfoResponseDto;
 import com.example.rent_apartment.model.dto.PersonsLocation;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public interface RentApartmentService {
@@ -29,6 +30,8 @@ public interface RentApartmentService {
 
     ApartmentWithMessageDto registrationNewApartment(ApartmentDto apartmentDto);
 
-    ApartmentWithMessageDto bookApartment(Long id, LocalDateTime start, LocalDateTime end);
+    ApartmentWithMessageDto bookApartment(Long id, LocalDate start, LocalDate end);
+
+    ApartmentWithMessageDto bookApartmentPromoCode(Long id, LocalDate start, LocalDate end, String promoCode);
 }
 

@@ -5,7 +5,7 @@ import com.example.rent_apartment.integration.GeoCoderRestTemplateManager;
 import com.example.rent_apartment.integration.ProductRestTemplateManager;
 import com.example.rent_apartment.mapper.ApplicationMapper;
 import com.example.rent_apartment.model.dto.*;
-import com.example.rent_apartment.model.dto.yandex_integration.YandexWeatherResponse;
+import com.example.rent_apartment.model.dto.yandex_weather_ntegration.YandexWeatherResponse;
 import com.example.rent_apartment.model.entity.AddressEntity;
 import com.example.rent_apartment.model.entity.ApartmentEntity;
 import com.example.rent_apartment.model.entity.BookingHistoryEntity;
@@ -23,14 +23,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.Month;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.example.rent_apartment.config.CityTranslationStatic.getCityInRussianLanguage;
 import static com.example.rent_apartment.constant_project.ConstantProject.*;
+import static java.util.Objects.isNull;
 
 
 @Service
@@ -232,7 +237,56 @@ public class RentApartmentServiceImpl implements RentApartmentService {
     }
 
     @Override
-    public ApartmentWithMessageDto bookApartment(Long id, LocalDateTime start, LocalDateTime end) {
+    public ApartmentWithMessageDto bookApartment(Long id, LocalDate start, LocalDate end) {
+
+        ApartmentEntity apartmentEntityById = apartmentRepository.getApartmentEntityById(id);
+
+        if (apartmentEntityById.getStatus().equals("false")) {
+            return new ApartmentWithMessageDto("Квартира занята", null);
+        }
+
+
+
+        LocalDateTime testStart = LocalDateTime.of(2023, 10, 10,0,0);
+        LocalDateTime testEnd = LocalDateTime.of(2023, 10, 10,0,0);
+        long daysCount = ChronoUnit.DAYS.between(start, end);
+
+        apartmentEntityById.setStatus("false");
+        apartmentRepository.save(apartmentEntityById);
+
+        ApartmentWithMessageDto apartmentById = getApartmentById(id);
+        String sessionNickName = userSession.getNickName();
+
+
+        List<ClientApplicationEntity> clientApplicationEntitiesByNickName = clientRepository.getClientApplicationEntitiesByNickName(sessionNickName);
+        ClientApplicationEntity clientApplicationEntity = clientApplicationEntitiesByNickName.get(0);
+
+        if (isNull(clientApplicationEntity.getBookingCount())) {
+            clientApplicationEntity.setBookingCount(1);
+        } else {
+            clientApplicationEntity.setBookingCount(clientApplicationEntity.getBookingCount() + 1);
+        }
+
+        clientRepository.save(clientApplicationEntity);
+
+        BookingHistoryEntity bookingHistoryEntity = new BookingHistoryEntity();
+        bookingHistoryEntity.setApartmentEntity(apartmentEntityById);
+        bookingHistoryEntity.setClientApplicationEntity(clientApplicationEntity);
+        bookingHistoryEntity.setStartDate(start);
+        bookingHistoryEntity.setEndDate(end);
+        bookingHistoryEntity.setDaysCount(daysCount);
+        bookingHistoryRepository.save(bookingHistoryEntity);
+
+        try {
+            Double finalPayment = productRestTemplateManager.prepareProduct(bookingHistoryEntity.getId());
+            return new ApartmentWithMessageDto("Квартира забронирована c " + start + " " + LocalTime.of(12,0) + " по " + end + " " + LocalTime.of(12,0) + " Ваш платеж " + finalPayment, apartmentById.getApartmentDto());
+        } catch (Exception e) {
+            return new ApartmentWithMessageDto("Квартира забронирована c " + start + " " + LocalTime.of(12,0) + " по " + end + " " + LocalTime.of(12,0) + " без расчета скидки", apartmentById.getApartmentDto());
+        }
+    }
+
+    @Override
+    public ApartmentWithMessageDto bookApartmentPromoCode(Long id, LocalDate start, LocalDate end, String promoCode) {
 
         ApartmentEntity apartmentEntityById = apartmentRepository.getApartmentEntityById(id);
 
@@ -251,6 +305,13 @@ public class RentApartmentServiceImpl implements RentApartmentService {
         List<ClientApplicationEntity> clientApplicationEntitiesByNickName = clientRepository.getClientApplicationEntitiesByNickName(sessionNickName);
         ClientApplicationEntity clientApplicationEntity = clientApplicationEntitiesByNickName.get(0);
 
+        if (isNull(clientApplicationEntity.getBookingCount())) {
+            clientApplicationEntity.setBookingCount(1);
+        } else {
+            clientApplicationEntity.setBookingCount(clientApplicationEntity.getBookingCount() + 1);
+        }
+
+        clientRepository.save(clientApplicationEntity);
 
         BookingHistoryEntity bookingHistoryEntity = new BookingHistoryEntity();
         bookingHistoryEntity.setApartmentEntity(apartmentEntityById);
@@ -263,7 +324,7 @@ public class RentApartmentServiceImpl implements RentApartmentService {
             productRestTemplateManager.prepareProduct(bookingHistoryEntity.getId());
             return new ApartmentWithMessageDto("Квартира забронирована c даты " + start + " по " + end, apartmentById.getApartmentDto());
         } catch (Exception e) {
-            return new ApartmentWithMessageDto("Квартира забронирована c даты " + start + " по " + end + "без расчета скидки", apartmentById.getApartmentDto());
+            return new ApartmentWithMessageDto("Квартира забронирована c даты " + start + " по " + end + " без расчета скидки", apartmentById.getApartmentDto());
         }
     }
 

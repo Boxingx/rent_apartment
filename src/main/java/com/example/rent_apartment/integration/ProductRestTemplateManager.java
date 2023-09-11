@@ -9,15 +9,15 @@ import org.springframework.web.client.RestTemplate;
 @Service
 public class ProductRestTemplateManager {
 
-    public void prepareProduct(@RequestParam Long id) {
+    public Double prepareProduct(@RequestParam Long id) {
 
         RestTemplate restTemplate = new RestTemplate();
 
         String path = "http://localhost:8097/product/add?id=%s";
-        restTemplate.exchange(String.format(path, id),
+        Double body = restTemplate.exchange(String.format(path, id),
                 HttpMethod.GET,
                 new HttpEntity<>(null),
-                void.class).getBody();
-
+                Double.class).getBody();
+        return body;
     }
 }

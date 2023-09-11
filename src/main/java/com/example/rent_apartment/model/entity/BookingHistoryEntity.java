@@ -3,6 +3,7 @@ package com.example.rent_apartment.model.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -25,10 +26,22 @@ public class BookingHistoryEntity {
     private ClientApplicationEntity clientApplicationEntity;
 
     @Column(name = "start_date")
-    private LocalDateTime startDate;
+    private LocalDate startDate;
 
     @Column(name = "end_date")
-    private LocalDateTime endDate;
+    private LocalDate endDate;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product")
+    private ProductEntity productEntity;
+
+    @Column(name = "days_count")
+    private Long daysCount;
+
+    @Column(name = "final_payment")
+    private Double finalPayment;
+
+
 
 
 }
